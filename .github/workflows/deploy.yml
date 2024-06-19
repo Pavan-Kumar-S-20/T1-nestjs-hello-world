@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout code  # Step to check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Update to use the latest version
 
       - name: Set up Node.js  # Step to set up Node.js environment
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3  # Update to use the latest version
         with:
           node-version: '20'  # Specify Node.js version
 
@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout code  # Step to check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Update to use the latest version
 
       - name: Deploy to EC2  # Step to deploy application to EC2 instance
         env:
@@ -38,4 +38,7 @@ jobs:
           KEY: ${{ secrets.EC2_KEY }}    # Retrieve SSH key from secrets
           USER: ec2-user                 # SSH user for EC2 instance
         run: |
-          ssh -i $KEY $USER@$HOST 'bash -s' < ./deploy/deploy.sh  # Execute deployment script
+          echo "$KEY" > key.pem  # Write the SSH key to a file
+          chmod 600 key.pem      # Set permissions for the SSH key
+          ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST 'bash -s' < ./deploy/deploy.sh  # Execute deployment script
+          rm key.pem  # Clean up the key file after use
