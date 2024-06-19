@@ -1,0 +1,41 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Specifies the runner environment
+
+    steps:
+      - name: Checkout code  # Step to check out repository code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js  # Step to set up Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'  # Specify Node.js version
+
+      - name: Install dependencies  # Step to install npm dependencies
+        run: npm install
+
+      - name: Run tests  # Step to run tests
+        run: npm test
+
+  deploy:
+    runs-on: ubuntu-latest  # Runner environment for deployment job
+    needs: build  # Ensure build job completes successfully before deployment
+
+    steps:
+      - name: Checkout code  # Step to check out repository code
+        uses: actions/checkout@v2
+
+      - name: Deploy to EC2  # Step to deploy application to EC2 instance
+        env:
+          HOST: ${{ secrets.EC2_HOST }}  # Retrieve EC2 host from secrets
+          KEY: ${{ secrets.EC2_KEY }}    # Retrieve SSH key from secrets
+          USER: ec2-user                 # SSH user for EC2 instance
+        run: |
+          ssh -i $KEY $USER@$HOST 'bash -s' < ./deploy/deploy.sh  # Execute deployment script
