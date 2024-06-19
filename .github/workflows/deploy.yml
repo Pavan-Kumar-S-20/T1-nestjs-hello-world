@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js  # Step to set up Node.js environment
         uses: actions/setup-node@v2
         with:
-          node-version: '14'  # Specify Node.js version
+          node-version: '20'  # Update to Node.js version 20
 
       - name: Install dependencies  # Step to install npm dependencies
         run: npm install
@@ -36,6 +36,6 @@ jobs:
         env:
           HOST: ${{ secrets.EC2_HOST }}  # Retrieve EC2 host from secrets
           KEY: ${{ secrets.EC2_KEY }}    # Retrieve SSH key from secrets
-          USER: ec2-user                 # SSH user for EC2 instance
+          USER: ec2-user               # SSH user for EC2 instance
         run: |
           ssh -i $KEY $USER@$HOST 'bash -s' < ./deploy/deploy.sh  # Execute deployment script
