@@ -1,14 +1,17 @@
-# Verify directory structure
-tree /home/ec2-user
+#!/bin/bash
 
-# Clone the repository if it doesn't exist
+# Navigate to your home directory
 cd /home/ec2-user
-git clone https://Pavan-Kumar-S-20/T1-nestjs-hello-world.git
+
+# Clone the repository if it doesn't exist, otherwise pull the latest changes
+if [ ! -d "T1-nestjs-hello-world" ]; then
+    git clone https://github.com/your-username/T1-nestjs-hello-world.git
+fi
 
 # Navigate to the repository directory
 cd T1-nestjs-hello-world
 
-# Pull the latest changes
+# Pull the latest changes from the repository
 git pull origin main
 
 # Install dependencies
