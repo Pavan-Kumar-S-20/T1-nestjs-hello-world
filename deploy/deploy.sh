@@ -1,15 +1,7 @@
 #!/bin/bash
 
-# Navigate to your home directory
-cd /home/ec2-user
-
-# Clone the repository if it doesn't exist, otherwise pull the latest changes
-if [ ! -d "T1-nestjs-hello-world" ]; then
-    git clone https://github.com/your-username/T1-nestjs-hello-world.git
-fi
-
-# Navigate to the repository directory
-cd T1-nestjs-hello-world
+# Navigate to the project directory
+cd /home/ec2-user/T1-nestjs-hello-world
 
 # Pull the latest changes from the repository
 git pull origin main
@@ -22,8 +14,12 @@ npm run build
 
 # Check if pm2 is installed and run your application
 if command -v pm2 &> /dev/null; then
-    pm2 restart app
+    if pm2 describe app > /dev/null; then
+        pm2 restart app --update-env
+    else
+        pm2 start dist/main.js --name app
+    fi
 else
-    sudo npm install -g pm2
-    pm2 start dist/main.js --name app
+    echo "pm2 is not installed. Please install pm2 globally: npm install -g pm2"
+    exit 1
 fi
