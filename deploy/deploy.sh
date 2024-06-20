@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Navigate to your application directory
-cd "/home/ec2-user/Downloads/Task 1/hello-world"
+cd "/home/ec2-user/T1-nestjs-hello-world"
 
 # Pull the latest changes from the repository
 git pull origin main
