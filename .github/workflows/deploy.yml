@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
+
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
@@ -36,4 +36,5 @@ jobs:
           USER: ec2-user  # Adjust this to your EC2 instance's username
           HOST: ${{ secrets.HOST }}  # Ensure this is the correct hostname or IP
         run: |
+          echo "Connecting to $USER@$HOST"
           ssh -o StrictHostKeyChecking=no -i $KEY $USER@$HOST 'bash -s' < ./deploy/deploy.sh
