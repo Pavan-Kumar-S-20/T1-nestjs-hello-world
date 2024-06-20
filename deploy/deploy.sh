@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Adjust the path to your application directory
-APP_DIR="/path/to/your/application"
-
-# Navigate to the application directory
-cd "$APP_DIR" || exit
-
 # Pull the latest changes from the repository
 git pull origin main
 
