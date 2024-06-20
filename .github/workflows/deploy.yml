@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy
 
 on:
   push:
@@ -10,31 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Install dependencies
-        run: npm install
+    - name: Copy files to EC2
+      run: scp -r -o StrictHostKeyChecking=no . ec2-user@${{ secrets.HOST }}:/home/ec2-user/T1-nestjs-hello-world
 
-      - name: Build
-        run: npm run build
-
-      - name: Prepare SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-      - name: Deploy to EC2
-        env:
-          KEY: ~/.ssh/id_rsa
-          USER: ec2-user  # Adjust this to your EC2 instance's username
-          HOST: ${{ secrets.HOST }}  # Ensure this is the correct hostname or IP
-        run: |
-          echo "Connecting to $USER@$HOST"
-          ssh -o StrictHostKeyChecking=no -i $KEY $USER@$HOST 'bash -s' < ./deploy/deploy.sh
+    - name: Execute deployment script
+      run: ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.HOST }} 'bash /home/ec2-user/T1-nestjs-hello-world/deploy/deploy.sh'
