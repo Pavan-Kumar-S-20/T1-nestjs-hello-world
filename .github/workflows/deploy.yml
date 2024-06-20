@@ -1,41 +1,39 @@
-name: CI/CD Pipeline
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - main  # Trigger on push to main branch
+      - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest  # Specifies the runner environment
+  deploy:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code  # Step to check out repository code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js  # Step to set up Node.js environment
-        uses: actions/setup-node@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v2
         with:
-          node-version: '20'  # Specify Node.js version 20
+          node-version: '14'
 
-      - name: Install dependencies  # Step to install npm dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: Run tests  # Step to run tests
-        run: npm test
+      - name: Build
+        run: npm run build
 
-  deploy:
-    runs-on: ubuntu-latest  # Runner environment for deployment job
-    needs: build  # Ensure build job completes successfully before deployment
-
-    steps:
-      - name: Checkout code  # Step to check out repository code
-        uses: actions/checkout@v3
-
-      - name: Deploy to EC2  # Step to deploy application to EC2 instance
-        env:
-          HOST: ${{ secrets.EC2_HOST }}  # Retrieve EC2 host from secrets
-          KEY: ${{ secrets.EC2_KEY }}    # Retrieve SSH key from secrets
-          USER: ec2-user               # SSH user for EC2 instance
+      - name: Prepare SSH Key
         run: |
-          ssh -i $KEY $USER@$HOST 'bash -s' < ./deploy/deploy.sh  # Execute deployment script
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Deploy to EC2
+        env:
+          KEY: ~/.ssh/id_rsa
+          USER: ec2-user  # Adjust this to your EC2 instance's username
+          HOST: ${{ secrets.HOST }}  # Ensure this is the correct hostname or IP
+        run: |
+          ssh -o StrictHostKeyChecking=no -i $KEY $USER@$HOST 'bash -s' < ./deploy/deploy.sh
